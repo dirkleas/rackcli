@@ -26,3 +26,9 @@ Features cater towards making your life easier for both your rack install and th
 1. ...
 
 Please submit features/priorties/suggestions as issues.
+
+--
+
+**Licenses**
+
+All concepts and source code in this repository is licensed under [BSD-3-Clause](LICENSE.txt) by Dirk Leas.
