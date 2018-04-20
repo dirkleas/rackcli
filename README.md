@@ -1,7 +1,7 @@
 # rackcli
-CLI for VCV Rack for managing your local rack installation, installed plugins, and patches.
+Platform commandline-interface (CLI) for [VCV Rack](https://vcvrack.com/) for managing your local rack installation, installed plugins, and patches. Additionally, this provides a complementary incubation venue for prototyping/implementing features/capabilities experimentally in consideration in the official VCV Rack environment under an alternative development model.
 
-Features cater towards making your life easier for both your rack install and the plugins/modules you've installed. Features are composable with JSON output. Cross-platform, single binary without external dependencies or compiler/interpreter installations required.
+rackcli CLI features cater towards making your life easier for both your rack install and the plugins/modules you've installed. Features are composable with JSON output. Cross-platform, single binary without external dependencies or compiler/interpreter installations required.
 
 **Rack Features**
 1. version
