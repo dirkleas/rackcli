@@ -1,0 +1,8 @@
+#!/usr/local/bin/python3
+
+from glob import glob
+from pprint import pprint
+from pathlib import Path
+
+pprint(glob(str(Path.home()) + '/Documents/Rack/plugins/**/*.dylib')) # h4x other OSs
+

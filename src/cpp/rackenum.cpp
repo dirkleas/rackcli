@@ -27,13 +27,14 @@ bool systemIsFile(std::string path) {
 int main() {
   // just pick one, iterate on them all later
   std::string libraryFilename = string(std::getenv("HOME")) +
-    "/Documents/Rack/plugins/cf/plugin.dylib";
+		"/Documents/Rack/plugins/VCV-Console/plugin.dylib";
+//		"/Documents/Rack/plugins/cf/plugin.dylib";
 
   if (! systemIsFile(libraryFilename)) {
     std::cout << "no such plugin: " << libraryFilename << endl;
     return 0;
   }
-  
+
   // dynamically load and introspect
   void *handle = dlopen(libraryFilename.c_str(), RTLD_NOW);
   if (!handle) {
