@@ -3,6 +3,8 @@ Platform commandline-interface (CLI) for [VCV Rack](https://vcvrack.com/) for ma
 
 rackcli CLI features cater towards making your life easier for both your rack install and the plugins/modules you've installed. Features are composable with JSON output. Cross-platform, single binary without external dependencies or compiler/interpreter installations required.
 
+How does rackcli fit into a typical rack workflow? YMMV, but I'll be using rackcli alongside rack so I can bounce down to my shell prompt, kick off a rackcli command or two, then back to rack for a quick *File+Revert* to revert to the updated patch file (of course I regularly hit *META-S* to save my wigglz) -- walah, instant magic!
+
 **Rack Features**
 1. version
 1. get/set rack settings
