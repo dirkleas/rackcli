@@ -25,7 +25,22 @@ rackcli CLI features cater towards making your life easier for both your rack in
 1. social media share
 1. ...
 
-Please submit features/priorties/suggestions as issues.
+**Example Usage**
+```
+rackcli --version
+rackcli --settings
+rackcli --settings --update "zoom=1.75 wireOpacity=75.0" --add-favorite 'plugin="Befaco" model="EvenVCO"'
+rackcli --panic
+rackcli --list
+rackcli --documentation
+rackcli --layout --row 1 --col 3 --shift-left ; remove empty HP beyond 3rd module
+rackcli --layout --row 1:2 --shift-down 2
+rackcli --layout --shift-left
+rackcli --layout --row 3 --col 2 --add-hp 25 ; insert 25 HP of space before 3rd module
+rackcli --share ~/Desktop/ep1cY0.vcv --to [youtube|patchstorage|twitter|instagram|etc] ; prompt for creds, no history
+```
+
+Check out the open issues for additional active conversations and please submit your own features/priorties/suggestions [there](https://github.com/dirkleas/rackcli/issues) as well. 
 
 --
 
