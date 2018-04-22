@@ -48,4 +48,4 @@ Check out the open issues for additional active conversations and please submit 
 
 **Licenses**
 
-All concepts and source code in this repository is licensed under [BSD-3-Clause](LICENSE.txt) by Dirk Leas.
+All concepts and source code in this repository is licensed under [BSD-3-Clause](LICENSE) by Dirk Leas.
