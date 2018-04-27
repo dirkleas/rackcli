@@ -69,7 +69,7 @@ def meta2json(): # realize timely meta (rack plugin module metadata) as json
 
 def meta2patch(meta): # restructure to match patch format
     mp = []
-    for p in meta:
+    for p in meta['plugins']:
         for m in p['models']:
             mp.append({'plugin': p['slug'], 'version': p['version'], 'model': m['slug']})
     return(mp)

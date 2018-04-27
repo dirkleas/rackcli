@@ -39,12 +39,12 @@ export RACK_DIR=path-to-rack-source
 make
 ```
 
-If you get an error during make referencing a duplicate main symbol, temporarily delete /path-to-rack-source/src/build/main.cpp.*.
+If you get an error during make referencing a duplicate main symbol, temporarily delete /path-to-rack-source/src/build/main.cpp.
 
 **Example Usage**
 ```
 alias rackcli="/path-to-rachcli/rackcli"
-alias rackshim="DYLD_FALLBACK_LIBRARY_PATH=path-to-vcv-rack /path-to-rachshim/rackshim --json"
+alias rackshim="DYLD_FALLBACK_LIBRARY_PATH=path-to-vcv-rack /path-to-rackshim/rackshim --json"
 
 rackcli --version
 rackcli --settings
@@ -59,7 +59,7 @@ rackcli --layout --row 3 --col 2 --add-hp 25 ; insert 25 HP of space before 3rd 
 rackcli --share ~/Desktop/ep1cY0.vcv --to [youtube|patchstorage|twitter|instagram|etc] ; prompt for creds, no history
 ```
 
-Check out the open issues for additional active conversations and please submit your own features/priorties/suggestions [there](https://github.com/dirkleas/rackcli/issues) as well. 
+Check out the open issues for additional active conversations and please submit your own features/priorities/suggestions [there](https://github.com/dirkleas/rackcli/issues) as well.
 
 --
 

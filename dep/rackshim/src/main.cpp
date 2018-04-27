@@ -1,5 +1,7 @@
+
 #include "plugin.hpp"
 #include "util/common.hpp"
+#include <jansson.h>
 
 #include <string.h>
 #include <stdio.h>
@@ -61,30 +63,41 @@ std::string getPlugsDir() {
 	dir = home;
 	dir += "/.Rack/plugins";
 #endif
-	
+
 	return dir;
 }
 
-// Print plugin metadata to screen
-static bool printPlugin(Plugin *plugin) {
-	printf("Slug: %s\n", plugin->slug.c_str());
-	printf("Version: %s\n", plugin->version.c_str());
-	printf("\nModules:\n");
-	
-	// List modules
-	for (Model *model : plugin->models) {
-		printf("\n");
-		printf("Author: %s\n", model->author.c_str());
-		printf("Slug: %s\n", model->slug.c_str());
-		printf("Name: %s\n", model->name.c_str());
-		
-		printf("Tags: ");
-		for (ModelTag tag : model->tags) {
-			printf("%s, ", gTagNames[tag].c_str());
+static bool serializePluginsJSON() {
+	json_t *metaj = json_object(); // meta as json, plugins as json, etc
+	json_t *psj = json_array();
+	json_object_set_new(metaj, "token", json_string(gToken.c_str()));
+	json_object_set_new(metaj, "path", json_string(getPlugsDir().c_str()));
+	json_object_set_new(metaj, "pluginCount", json_integer(gPlugins.size()));
+	for (Plugin *plugin : gPlugins) {
+		json_t *pj = json_object();
+		json_object_set_new(pj, "slug", json_string(plugin->slug.c_str()));
+		json_object_set_new(pj, "version", json_string(plugin->version.c_str()));
+		json_object_set_new(pj, "modelCount", json_integer(plugin->models.size()));
+		json_t *msj = json_array();
+		json_object_set_new(pj, "models", msj);
+		for (Model *model : plugin->models) {
+			json_t *mj = json_object();
+			json_object_set_new(mj, "slug", json_string(model->slug.c_str()));
+			json_object_set_new(mj, "name", json_string(model->name.c_str()));
+			json_object_set_new(mj, "width", json_integer(69));
+			json_t *tsj = json_array();
+			for (ModelTag tag : model->tags) {
+				json_array_append(tsj, json_string(gTagNames[tag].c_str()));
+			}
+			json_object_set_new(mj, "tags", tsj);
+			json_array_append(msj, mj);
 		}
-		printf("\n");
+		json_array_append(psj, pj);
 	}
-	
+	json_object_set_new(metaj, "plugins", psj);
+
+	printf("%s\n", json_dumps(metaj, 0));
+
 	return true;
 }
 
@@ -122,7 +135,7 @@ static bool loadPlug(std::string path) {
 		return false;
 	}
 #endif
-	
+
 	// Call plugin's init() function
 	typedef void (*InitCallback)(Plugin *);
 	InitCallback initCallback;
@@ -153,9 +166,7 @@ static bool loadPlug(std::string path) {
 
 	// Add plugin to list
 	gPlugins.push_back(plugin);
-	printf("Loaded plugin %s\n", libraryFilename.c_str());
 
-	printPlugin(plugin);
 	return true;
 }
 
@@ -163,21 +174,16 @@ static bool loadPlug(std::string path) {
 static bool loadAllPlugs() {
 	// Get local plugins directory
 	std::string localPlugins = getPlugsDir();
-	printf("Loading all plugins in your Rack plugins directory %s + core\n\n", localPlugins.c_str());
 
 	// Load the built-in core plugin
 	Plugin *corePlugin = new Plugin();
 	init(corePlugin);
 	gPlugins.push_back(corePlugin);
-	printf("Loaded built-in plugin Core\n");
-	printPlugin(corePlugin);
-	printf("\n");
 
 	// Load all plugins
 	for (std::string pluginPath : systemListEntries(localPlugins)) {
 		if (systemIsDirectory(pluginPath)) {
 			loadPlug(pluginPath);
-			printf("\n");
 		}
 	}
 
@@ -199,9 +205,11 @@ int main(int argc, char* argv[]) {
 		printf("Usage: %s [plugin directory]", argv[0]);
 		return -1;
 	}
-	
+
+	serializePluginsJSON(); // serialize JSON
+
 	// Unload all plugins
 	pluginDestroy();
-	
+
 	return 0;
 }
