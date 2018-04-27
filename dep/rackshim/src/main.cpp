@@ -163,7 +163,15 @@ static bool loadPlug(std::string path) {
 static bool loadAllPlugs() {
 	// Get local plugins directory
 	std::string localPlugins = getPlugsDir();
-	printf("Loading all plugins in your Rack plugins directory %s\n\n", localPlugins.c_str());
+	printf("Loading all plugins in your Rack plugins directory %s + core\n\n", localPlugins.c_str());
+
+	// Load the built-in core plugin
+	Plugin *corePlugin = new Plugin();
+	init(corePlugin);
+	gPlugins.push_back(corePlugin);
+	printf("Loaded built-in plugin Core\n");
+	printPlugin(corePlugin);
+	printf("\n");
 
 	// Load all plugins
 	for (std::string pluginPath : systemListEntries(localPlugins)) {
