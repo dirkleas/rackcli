@@ -5,10 +5,31 @@
 from pathlib import Path
 from hashlib import sha256
 from fuzzywuzzy import fuzz, process
-import os, subprocess, shutil, glob, json, click
+import os, sys, subprocess, shutil, json, click
 
-rack = str(Path.home()) + '/Documents/Rack' # h4x other OSs
-settings = json.loads(open(rack + '/settings.json').read())
+def rackdir(): # os-specific VCV Rack installation directory
+    return({'darwin': Path.home() / 'Documents/Rack', 'linux': Path.home() / '.rack',
+        'win32': Path.home() / 'My Documents/Rack'}[sys.platform])
+
+def meta2hash(): # hash libs/modification timestamps
+    fingerprint = ''
+    for p in (rackdir() / 'plugins').rglob('plugin.*'):
+        fingerprint += str(p) + '@' + str(p.stat().st_mtime)
+    return(sha256(fingerprint.encode('utf-8')).hexdigest())
+
+def meta2json(): # realize timely meta (rack plugin module metadata) as json
+    metahash = rackdir() / 'meta.hash'; metajson = rackdir() / 'meta.json'
+    if not metahash.is_file(): metahash.touch(mode=0o700)
+    if metahash.read_text() == meta2hash():
+        return(json.loads(metajson.read_text()))
+    else:
+        metahash.write_text(meta2hash())
+        meta = subprocess.getoutput('rackshim') # assumes pathed rackshim
+        metajson.write_text(meta)
+        return(json.loads(meta))
+
+settings = json.loads((rackdir() / 'settings.json').read_text())
+meta = meta2json()
 
 @click.group()
 def cli():
@@ -28,13 +49,13 @@ def cli():
 @click.argument('patch', type=click.Path(exists=True), default=settings['lastPath'])
 def fix(patch, backup):
     '''Attempt fuzzy plugin slug name fix on PATCH.'''
-    p = json.load(open(patch))
     updated = False
+    patch = Path(patch)
+    p = json.loads(patch.read_text())
     mm = meta2patch(meta)
     for idx, m in enumerate(p['modules']):
         if m['plugin'] == 'Core' or \
                 sum(1 for _ in filter(lambda x: x['plugin'] == m['plugin'] and x['model'] == m['model'], mm)) > 0:
-            #print('{}:{} matches'.format(m['plugin'], m['model'])); continue
             continue # is version relevat?
         mm_match = list(filter(lambda x: fuzz.partial_ratio(x['plugin'], m['plugin']) > 80 and
             x['model'] == m['model'] and ver2int(x['version']) >= ver2int(m['version']), mm))
@@ -47,25 +68,8 @@ def fix(patch, backup):
             continue
         print('// {} has no match, next steps TBD **********'.format(m['plugin'])); continue
     if updated:
-        if backup: shutil.copyfile(patch, patch + '.bak') # backup instancing?
-        json.dump(p, open(patch, 'w'))
-        # print(json.dumps(patch, indent=4))
-
-def meta2hash(): # hash libs/modification timestamps
-    fingerprint = ''
-    for p in glob.glob(rack + '/plugins/**/plugin.*'):
-        fingerprint += p + '@' + str(os.path.getmtime(p))
-    return(sha256(fingerprint.encode('utf-8')).hexdigest())
-
-def meta2json(): # realize timely meta (rack plugin module metadata) as json
-    if not Path(rack + '/meta.hash').is_file(): open(rack + '/meta.hash', 'w').close()
-    if open(rack + '/meta.hash').read() == meta2hash():
-        return(json.loads(open(rack + '/meta.json').read()))
-    else:
-        open(rack + '/meta.hash', 'w').write(meta2hash())
-        meta = subprocess.getoutput('rackshim') # assumes pathed rackshim
-        open(rack + '/meta.json', 'w').write(meta)
-        return(json.loads(meta))
+        if backup: shutil.copyfile(str(patch), str(patch) + '.bak') # backup instancing?
+        patch.write_text(json.dumps(p))
 
 def meta2patch(meta): # restructure to match patch format
     mp = []
@@ -79,5 +83,4 @@ def ver2int(v): # integer version: '0.6.1' => 61, '1.0.5' => 105, strip [non-dig
     return(sum(map(lambda x: x[0]*pow(10,x[1]), zip(digits, range(len(digits)-1, -1, -1)))))
 
 if __name__ == '__main__':
-    meta = meta2json()
     cli()

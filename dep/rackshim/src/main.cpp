@@ -1,4 +1,5 @@
 
+#include "app.hpp"
 #include "plugin.hpp"
 #include "util/common.hpp"
 #include <jansson.h>
@@ -70,6 +71,9 @@ std::string getPlugsDir() {
 static bool serializePluginsJSON() {
 	json_t *metaj = json_object(); // meta as json, plugins as json, etc
 	json_t *psj = json_array();
+	json_object_set_new(metaj, "applicationName", json_string(gApplicationName.c_str()));
+	json_object_set_new(metaj, "applicationVersion", json_string(gApplicationVersion.c_str()));
+	json_object_set_new(metaj, "apiHost", json_string(gApiHost.c_str()));
 	json_object_set_new(metaj, "token", json_string(gToken.c_str()));
 	json_object_set_new(metaj, "path", json_string(getPlugsDir().c_str()));
 	json_object_set_new(metaj, "pluginCount", json_integer(gPlugins.size()));
