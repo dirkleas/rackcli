@@ -76,6 +76,7 @@ static bool serializePluginsJSON() {
 	for (Plugin *plugin : gPlugins) {
 		json_t *pj = json_object();
 		json_object_set_new(pj, "slug", json_string(plugin->slug.c_str()));
+		json_object_set_new(pj, "path", json_string(plugin->path.c_str()));
 		json_object_set_new(pj, "version", json_string(plugin->version.c_str()));
 		json_object_set_new(pj, "modelCount", json_integer(plugin->models.size()));
 		json_t *msj = json_array();
@@ -84,6 +85,7 @@ static bool serializePluginsJSON() {
 			json_t *mj = json_object();
 			json_object_set_new(mj, "slug", json_string(model->slug.c_str()));
 			json_object_set_new(mj, "name", json_string(model->name.c_str()));
+			json_object_set_new(mj, "author", json_string(model->author.c_str()));
 			json_object_set_new(mj, "width", json_integer(69));
 			json_t *tsj = json_array();
 			for (ModelTag tag : model->tags) {

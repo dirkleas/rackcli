@@ -41,11 +41,24 @@ make
 
 If you get an error during make referencing a duplicate main symbol, temporarily delete /path-to-rack-source/src/build/main.cpp.
 
+Optionally, [jq](https://stedolan.github.io/jq/) is an awesome open source tool for hacking JSON files. Here are a couple of interesting use cases with the generated meta.json and settings.json:
+```
+rachshim | jq
+rackshim | jq 'del(.plugins)'
+rackshim | jq '.plugins[].slug'
+cat $RACK_DIR/settings.json | jq '.lastPath'
+```
+
 **Example Usage**
 ```
 alias rackcli="/path-to-rachcli/rackcli"
 alias rackshim="DYLD_FALLBACK_LIBRARY_PATH=path-to-vcv-rack /path-to-rackshim/rackshim --json"
 
+rackcli fix ~/Downloads/twilight.vcv --backup
+```
+
+**Feature Braistorm**
+```
 rackcli --version
 rackcli --settings
 rackcli --settings --update "zoom=1.75 wireOpacity=75.0" --add-favorite 'plugin="Befaco" model="EvenVCO"'
