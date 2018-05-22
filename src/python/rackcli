@@ -1,6 +1,7 @@
 #!/usr/local/bin/python3
 
 # rackcli - commandline supplemnt for VCV Rack w/ rackshim dependency
+#           settings in ~/.rachcli/settings.json
 
 from pathlib import Path
 from hashlib import sha256
@@ -29,7 +30,7 @@ def meta2json(): # realize timely meta (rack plugin module metadata) as json
         return(json.loads(meta))
 
 settings = json.loads((rackdir() / 'settings.json').read_text())
-meta = meta2json()
+# meta = meta2json()
 
 @click.group()
 def cli():
@@ -45,42 +46,57 @@ def cli():
     pass
 
 @cli.command()
-@click.option('--backup/--no-backup', default=False, help='Optionally backup changed patch.')
-@click.argument('patch', type=click.Path(exists=True), default=settings['lastPath'])
-def fix(patch, backup):
-    '''Attempt fuzzy plugin slug name fix on PATCH.'''
-    updated = False
-    patch = Path(patch)
-    p = json.loads(patch.read_text())
-    mm = meta2patch(meta)
-    for idx, m in enumerate(p['modules']):
-        if m['plugin'] == 'Core' or \
-                sum(1 for _ in filter(lambda x: x['plugin'] == m['plugin'] and x['model'] == m['model'], mm)) > 0:
-            continue # is version relevat?
-        mm_match = list(filter(lambda x: fuzz.partial_ratio(x['plugin'], m['plugin']) > 80 and
-            x['model'] == m['model'] and ver2int(x['version']) >= ver2int(m['version']), mm))
-        if len(mm_match) > 0: # replace based on first match
-            p['modules'][idx]['plugin'] = mm_match[0]['plugin']
-            p['modules'][idx]['version'] = mm_match[0]['version']
-            print('// {} updated to {} for {} module #{}, fuzzy match'.format( \
-                m['plugin'], mm_match[0]['plugin'], m['model'], idx))
-            updated = True
-            continue
-        print('// {} has no match, next steps TBD **********'.format(m['plugin'])); continue
-    if updated:
-        if backup: shutil.copyfile(str(patch), str(patch) + '.bak') # backup instancing?
-        patch.write_text(json.dumps(p))
+@click.argument('settings')
+@click.option('--rackdir', help='Set/get VCV Rack directory, specify directory to set.')
+def settings():
+    'Manage rackcli settings.'
+    pass
 
-def meta2patch(meta): # restructure to match patch format
-    mp = []
-    for p in meta['plugins']:
-        for m in p['models']:
-            mp.append({'plugin': p['slug'], 'version': p['version'], 'model': m['slug']})
-    return(mp)
+@cli.command()
+@click.argument('catalog')
+@click.option('--share', default=True, help='Share your full VCVRACK/catalog.json with crowdsourced cloud.')
+@click.option('--sync', help='Sync your VCVRACK/catalog.partial.json with crowdsourced cloud.')
+def settings():
+    'Manage rackcli catalog located in VCV Rack directory.'
+    pass
 
-def ver2int(v): # integer version: '0.6.1' => 61, '1.0.5' => 105, strip [non-digits|.]?
-    digits = list(map(lambda x: int(x), v.split('.')))
-    return(sum(map(lambda x: x[0]*pow(10,x[1]), zip(digits, range(len(digits)-1, -1, -1)))))
+# @cli.command()
+# @click.option('--backup/--no-backup', default=False, help='Optionally backup changed patch.')
+# @click.argument('patch', type=click.Path(exists=True), default=settings['lastPath'])
+# def fix(patch, backup):
+#     'Attempt fuzzy plugin slug name fix on PATCH.'
+#     updated = False
+#     patch = Path(patch)
+#     p = json.loads(patch.read_text())
+#     mm = meta2patch(meta)
+#     for idx, m in enumerate(p['modules']):
+#         if m['plugin'] == 'Core' or \
+#                 sum(1 for _ in filter(lambda x: x['plugin'] == m['plugin'] and x['model'] == m['model'], mm)) > 0:
+#             continue # is version relevat?
+#         mm_match = list(filter(lambda x: fuzz.partial_ratio(x['plugin'], m['plugin']) > 80 and
+#             x['model'] == m['model'] and ver2int(x['version']) >= ver2int(m['version']), mm))
+#         if len(mm_match) > 0: # replace based on first match
+#             p['modules'][idx]['plugin'] = mm_match[0]['plugin']
+#             p['modules'][idx]['version'] = mm_match[0]['version']
+#             print('// {} updated to {} for {} module #{}, fuzzy match'.format( \
+#                 m['plugin'], mm_match[0]['plugin'], m['model'], idx))
+#             updated = True
+#             continue
+#         print('// {} has no match, next steps TBD **********'.format(m['plugin'])); continue
+#     if updated:
+#         if backup: shutil.copyfile(str(patch), str(patch) + '.bak') # backup instancing?
+#         patch.write_text(json.dumps(p))
+#
+# def meta2patch(meta): # restructure to match patch format
+#     mp = []
+#     for p in meta['plugins']:
+#         for m in p['models']:
+#             mp.append({'plugin': p['slug'], 'version': p['version'], 'model': m['slug']})
+#     return(mp)
+#
+# def ver2int(v): # integer version: '0.6.1' => 61, '1.0.5' => 105, strip [non-digits|.]?
+#     digits = list(map(lambda x: int(x), v.split('.')))
+#     return(sum(map(lambda x: x[0]*pow(10,x[1]), zip(digits, range(len(digits)-1, -1, -1)))))
 
 if __name__ == '__main__':
     cli()
