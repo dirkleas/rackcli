@@ -5,32 +5,28 @@
 
 from pathlib import Path
 from hashlib import sha256
-from fuzzywuzzy import fuzz, process
-import os, sys, subprocess, shutil, json, click
+from typing import *
+import json, click, requests
 
-def rackdir(): # os-specific VCV Rack installation directory
-    return({'darwin': Path.home() / 'Documents/Rack', 'linux': Path.home() / '.rack',
-        'win32': Path.home() / 'My Documents/Rack'}[sys.platform])
+def hash(rv: str, ps: str, pv: str, ms: str) -> str:
+    'hash rack version, plugin slug/version, model slug'
+    return(sha256(str.encode('{}|{}|{}|{}'.format(rv, ps, pv, ms))).hexdigest())
 
-def meta2hash(): # hash libs/modification timestamps
-    fingerprint = ''
-    for p in (rackdir() / 'plugins').rglob('plugin.*'):
-        fingerprint += str(p) + '@' + str(p.stat().st_mtime)
-    return(sha256(fingerprint.encode('utf-8')).hexdigest())
+def catalog_share_corpus(catalog: Dict) -> Dict[str, Tuple]:
+    'generate partial corpus from catalog for sharing with cloud'
+    return({hash(catalog['applicationVersion'], p['slug'], p['version'], m['slug']):
+            (catalog['applicationVersion'], p['slug'], p['version'], m['slug'], m['width']) \
+            for p in catalog['plugins'] for m in p['models']})
 
-def meta2json(): # realize timely meta (rack plugin module metadata) as json
-    metahash = rackdir() / 'meta.hash'; metajson = rackdir() / 'meta.json'
-    if not metahash.is_file(): metahash.touch(mode=0o700)
-    if metahash.read_text() == meta2hash():
-        return(json.loads(metajson.read_text()))
-    else:
-        metahash.write_text(meta2hash())
-        meta = subprocess.getoutput('rackshim') # assumes pathed rackshim
-        metajson.write_text(meta)
-        return(json.loads(meta))
+def patch_share_corpus(patch: Dict) -> Dict[str, Tuple]:
+    'corpus request from a "r4xH4x patch" patch'
+    return({hash(patch['version'], m['plugin'], m['version'], m['model']):
+            (patch['version'], m['plugin'], m['version'], m['model'], m['width']) for m in patch['modules']})
 
-settings = json.loads((rackdir() / 'settings.json').read_text())
-# meta = meta2json()
+def partial_catalog_sync_request(partial: Dict) -> List[str]:
+    'corpus request for your catalog.partial.json'
+    return([hash(partial['applicationVersion'], p['slug'], p['version'], m['slug']) \
+            for p in partial['plugins'] for m in p['models']])
 
 @click.group()
 def cli():
@@ -46,57 +42,47 @@ def cli():
     pass
 
 @cli.command()
-@click.argument('settings')
-@click.option('--rackdir', help='Set/get VCV Rack directory, specify directory to set.')
-def settings():
+@click.option('--rackdir', help='Save VCV Rack full directory path.',
+    type=click.Path(exists=True, file_okay=False, resolve_path=True))
+def settings(rackdir: str) -> None:
     'Manage rackcli settings.'
-    pass
+    cdir = Path(Path.home() / '.rackcli'); sp = Path(cdir / 'settings.json')
+    if not cdir.exists(): # optionally seed .rackcli w/ settings.json
+        cdir.mkdir(mode=0o700);
+        sp.touch(mode=0o700); sp.write_text('{}')
+    s = json.loads(sp.read_text())
+    if not rackdir: print(s); return # dump settings
+    s['rackdir'] = rackdir
+    sp.write_text(json.dumps(s, indent=2))
 
 @cli.command()
-@click.argument('catalog')
-@click.option('--share', default=True, help='Share your full VCVRACK/catalog.json with crowdsourced cloud.')
-@click.option('--sync', help='Sync your VCVRACK/catalog.partial.json with crowdsourced cloud.')
-def settings():
+@click.option('--share', help='Share your full VCVRACK/catalog.json with crowdsourced cloud.',
+    type=click.Path(exists=True, dir_okay=False, resolve_path=True))
+@click.option('--sync', help='Sync your VCVRACK/catalog.partial.json with crowdsourced cloud.',
+    type=click.Path(exists=True, dir_okay=False, resolve_path=True))
+def catalog(share, sync) -> None:
     'Manage rackcli catalog located in VCV Rack directory.'
-    pass
-
-# @cli.command()
-# @click.option('--backup/--no-backup', default=False, help='Optionally backup changed patch.')
-# @click.argument('patch', type=click.Path(exists=True), default=settings['lastPath'])
-# def fix(patch, backup):
-#     'Attempt fuzzy plugin slug name fix on PATCH.'
-#     updated = False
-#     patch = Path(patch)
-#     p = json.loads(patch.read_text())
-#     mm = meta2patch(meta)
-#     for idx, m in enumerate(p['modules']):
-#         if m['plugin'] == 'Core' or \
-#                 sum(1 for _ in filter(lambda x: x['plugin'] == m['plugin'] and x['model'] == m['model'], mm)) > 0:
-#             continue # is version relevat?
-#         mm_match = list(filter(lambda x: fuzz.partial_ratio(x['plugin'], m['plugin']) > 80 and
-#             x['model'] == m['model'] and ver2int(x['version']) >= ver2int(m['version']), mm))
-#         if len(mm_match) > 0: # replace based on first match
-#             p['modules'][idx]['plugin'] = mm_match[0]['plugin']
-#             p['modules'][idx]['version'] = mm_match[0]['version']
-#             print('// {} updated to {} for {} module #{}, fuzzy match'.format( \
-#                 m['plugin'], mm_match[0]['plugin'], m['model'], idx))
-#             updated = True
-#             continue
-#         print('// {} has no match, next steps TBD **********'.format(m['plugin'])); continue
-#     if updated:
-#         if backup: shutil.copyfile(str(patch), str(patch) + '.bak') # backup instancing?
-#         patch.write_text(json.dumps(p))
-#
-# def meta2patch(meta): # restructure to match patch format
-#     mp = []
-#     for p in meta['plugins']:
-#         for m in p['models']:
-#             mp.append({'plugin': p['slug'], 'version': p['version'], 'model': m['slug']})
-#     return(mp)
-#
-# def ver2int(v): # integer version: '0.6.1' => 61, '1.0.5' => 105, strip [non-digits|.]?
-#     digits = list(map(lambda x: int(x), v.split('.')))
-#     return(sum(map(lambda x: x[0]*pow(10,x[1]), zip(digits, range(len(digits)-1, -1, -1)))))
+    def no_rackdir() -> None: raise click.UsageError('Unknown rackdir, see rackcli settings --help')
+    sp = Path(Path.home() / '.rackcli/settings.json')
+    if not sp.exists(): no_rackdir(); return
+    s = json.loads(sp.read_text())
+    if not 'rackdir' in s: no_rackdir(); return
+    if share and sync: raise click.UsageError('Use --sync or --share, not both.'); return
+    if share: # share either PATCH.vcv or catalog.json
+        share = Path(share)
+        print('share:', share.suffix)
+        if not share.suffix in ['.vcv', '.json']: raise click.UsageError('.vcv and .json files only.'); return
+        request = json.loads(share.read_text())
+        if share.suffix == '.vcv': print(patch_share_corpus(request))
+        print(catalog_share_corpus(request)); return
+    if sync: # sync catalog.partial.json
+        sync = Path(sync)
+        print('sync:', sync.suffix)
+        if not sync.suffix in ['.json']: raise click.UsageError('.json files only.'); return
+        partial = json.loads(sync.read_text())
+        request = partial_catalog_sync_request(partial)
+        # print(request); return
+    print('nuttin') # check for both catalog.json, catalog.partial.json, or patch.json
 
 if __name__ == '__main__':
     cli()
