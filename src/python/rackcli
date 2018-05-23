@@ -8,6 +8,9 @@ from hashlib import sha256
 from typing import *
 import json, click, requests
 
+SYNC_URL = 'https://9k564tm679.execute-api.us-east-1.amazonaws.com/dev/sync'
+SHARE_URL = 'https://9k564tm679.execute-api.us-east-1.amazonaws.com/dev/share'
+
 def hash(rv: str, ps: str, pv: str, ms: str) -> str:
     'hash rack version, plugin slug/version, model slug'
     return(sha256(str.encode('{}|{}|{}|{}'.format(rv, ps, pv, ms))).hexdigest())
@@ -70,19 +73,21 @@ def catalog(share, sync) -> None:
     if share and sync: raise click.UsageError('Use --sync or --share, not both.'); return
     if share: # share either PATCH.vcv or catalog.json
         share = Path(share)
-        print('share:', share.suffix)
         if not share.suffix in ['.vcv', '.json']: raise click.UsageError('.vcv and .json files only.'); return
         request = json.loads(share.read_text())
-        if share.suffix == '.vcv': print(patch_share_corpus(request))
-        print(catalog_share_corpus(request)); return
+        if share.suffix == '.vcv': # share patch
+            request = patch_share_corpus(request)
+            print(json.dumps(requests.post(SHARE_URL, json=request).json(), indent=2, ensure_ascii=False))
+            return
+        request = catalog_share_corpus(request) # share catalog
+        print(json.dumps(requests.post(SHARE_URL, json=request).json(), indent=2, ensure_ascii=False))
+        return
     if sync: # sync catalog.partial.json
         sync = Path(sync)
-        print('sync:', sync.suffix)
         if not sync.suffix in ['.json']: raise click.UsageError('.json files only.'); return
-        partial = json.loads(sync.read_text())
-        request = partial_catalog_sync_request(partial)
-        # print(request); return
-    print('nuttin') # check for both catalog.json, catalog.partial.json, or patch.json
+        request = partial_catalog_sync_request(json.loads(sync.read_text()))
+        print(json.dumps(requests.post(SYNC_URL, json=request).json(), indent=2, ensure_ascii=False)); return
+    raise click.UsageError('Use --sync or --share.')
 
 if __name__ == '__main__':
     cli()
