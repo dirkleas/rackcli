@@ -31,6 +31,14 @@ def partial_catalog_sync_request(partial: Dict) -> List[str]:
     return([hash(partial['applicationVersion'], p['slug'], p['version'], m['slug']) \
             for p in partial['plugins'] for m in p['models']])
 
+def partial_fixer(partial: Dict, sync: Dict) -> Dict:
+    'sync the partial with width metadata, igore unknowns'
+    for p in partial['plugins']:
+        for m in p['models']:
+            try: m['width'] = sync['corpus'][hash(partial['applicationVersion'], p['slug'], p['version'], m['slug'])][4]
+            except: pass # ignore "unknowns", would an arbitrary default be "better"?
+    return(partial)
+
 @click.group()
 def cli():
     '''rackcli, v0.1.0
@@ -85,8 +93,10 @@ def catalog(share, sync) -> None:
     if sync: # sync catalog.partial.json
         sync = Path(sync)
         if not sync.suffix in ['.json']: raise click.UsageError('.json files only.'); return
+        partial = json.loads(sync.read_text())
         request = partial_catalog_sync_request(json.loads(sync.read_text()))
-        print(json.dumps(requests.post(SYNC_URL, json=request).json(), indent=2, ensure_ascii=False)); return
+        result = requests.post(SYNC_URL, json=request).json()
+        print(json.dumps(partial_fixer(partial, result), indent=2, ensure_ascii=False)); return
     raise click.UsageError('Use --sync or --share.')
 
 if __name__ == '__main__':
