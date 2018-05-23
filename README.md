@@ -9,6 +9,8 @@ rackcli CLI "features" cater towards making your life easier for managing your r
 
 How does rackcli fit into a typical rack workflow? YMMV, but I'll be using rackcli alongside rack so I can bounce down to my shell prompt, kick off a rackcli command or two, then back to rack for a quick *File+Revert* to revert to the updated patch file (of course I regularly hit *META-S* to save my wigglz) -- walah, instant magic!
 
+To get a sense of how the fork and plugin modules work, check out the rackcli/r4xH4x [lab videos](https://www.youtube.com/channel/UCv-mq6lyycCbvbQiZclik7Q).
+
 Here's the highlight reel for features under active development or beta-ready (see [Issues](https://github.com/dirkleas/rackcli/issues) marked "enhancement" for many more under serious consideration -- or add submit your own ideas/requests):
 
 **Rack Features**
@@ -35,41 +37,45 @@ Here's the highlight reel for features under active development or beta-ready (s
 1. ...
 
 **Installation**
-rackcli is implemented in [Python 3](https://www.python.org/downloads/). Once you download and install Python 3 for your OS, install the dependent library(s) as follows:
+rackcli is implemented in [Python 3](https://www.python.org/downloads/). Once you download and install the latest Python 3 version for your OS, install the dependent libraries as follows:
 ```
-pip3 install fuzzywuzzy
+pip3 install requests click
 ```
-Clone the supporting [VCV Rack fork](https://github.com/dirkleas/Rack) and follow the installation instructions for the best workflow experience. Don't forget to grab the v0.6 tag per the instructions (i.e. `git checkout v0.6`) as specified in the installation instructions.
+Clone the supporting [VCV Rack fork](https://github.com/dirkleas/Rack) and follow the installation instructions for the best workflow experience as it generates a full `catalog.json`, complete with plugin module widths. Don't forget to grab the v0.6 tag per the instructions (i.e. `git checkout v0.6`) as specified in the build installation instructions.
 
-Alternatively, your can follow the standard [VCV Rack](https://github.com/VCVRack/Rack) build instructions if you prefer to use the included rackshim (currently unstable), then complete the following additional steps:
-```
-export RACK_DIR=path-to-rack-source
-make
-```
+Alternatively, your can install the [DLwigglz r4xH4x](https://github.com/dirkleas/DLwigglz) plugin
+module to generate a partial catalog `catalog.partial.json` or `patch.json` for the current patch.
 
-If you get an error during make referencing a duplicate main symbol, temporarily delete /path-to-rack-source/src/build/main.cpp.
-
-Optionally, [jq](https://stedolan.github.io/jq/) is an awesome open source tool for hacking JSON files. Here are a couple of interesting use cases with the generated meta.json and settings.json:
+Optionally, [jq](https://stedolan.github.io/jq/) is an awesome open source tool for hacking JSON files. Here are a couple of interesting use cases with the generated `catalog.json` and `settings.json`:
 ```
-rachshim | jq
-rackshim | jq 'del(.plugins)'
-rackshim | jq '.plugins[].slug'
+export RACK_DIR=wherever-rack-is-installed
+
+cat $RACK_DIR/catalog.json | jq
+cat $RACK_DIR/catalog.partial.json | jq
+cat ANY_PATCH.vcv | jq
 cat $RACK_DIR/settings.json | jq '.lastPath'
 ```
 
-**Example Usage**
+**Example Usage -- Live Features (beta)**
 ```
 alias rackcli="/path-to-rachcli/rackcli"
-alias rackshim="DYLD_FALLBACK_LIBRARY_PATH=path-to-vcv-rack /path-to-rackshim/rackshim --json"
 
-rackcli fix ~/Downloads/twilight.vcv --backup
+rackcli
+rackcli --help
+
+rackcli settings --help
+rackcli settings
+rackcli settings --rackdir ~/Downloads/Rack
+
+rackcli catalog --help
+rackcli catalog --share $RACK_DIR/catalog.json | jq
+rackcli catalog --share $RACK_DIR/dox.vcv > proof.json
+rackcli catalog --sync $RACK_DIR/catalog.partial.json
 ```
 
-**Feature Braistorm**
+**Feature Brainstorm**
 ```
 rackcli --version
-rackcli --settings
-rackcli --settings --update "zoom=1.75 wireOpacity=75.0" --add-favorite 'plugin="Befaco" model="EvenVCO"'
 rackcli --panic
 rackcli --list
 rackcli --documentation
