@@ -1,11 +1,23 @@
 # rackcli
 Commandline-interface (CLI) for [VCV Rack](https://vcvrack.com/) to help with managing your local rack installation, installed plugins, and patches. Additionally, it provides a complementary incubation venue for prototyping/implementing features/capabilities experimentally in consideration in the official VCV Rack environment under an alternative development model.
 
-rackcli CLI "features" cater towards making your life easier for managing your rack installation as well as providing lots of "magic" to make your patching/wiggling/performace workflow smoother and faster than ever! It depends on one of two dependencies (both work-in-process): 1) a [fork of VCV Rack](https://github.com/dirkleas/Rack), or a stand-alone "shim" called rachshim included in this project's source code tree which is a non-GUI derivative of VCV Rack. The goal of both of these at a minimum is to make certain helpful information  (e.g. width of your plugin modules, etc.) available. The advantage of the "fork" is that it provides serveral other cool workflow enhacements -- check it out for details -- highlights include:
+rackcli CLI "features" cater towards making your life easier for managing your rack installation as well as providing lots of "magic" to make your patching/wiggling/performance workflow smoother and faster than ever! Core to these features is the cocept of centralized metadata for all the
+installed plugins and their modules which I refer to as the "catalog" -- it's actually a simple
+JSON file named `catalog.json` residing in the Rack directory. The care and feeding of the catalog depends on one of two mechanisms 1) my [fork of VCV Rack](https://github.com/dirkleas/Rack), or 2) my plugin module [DLwigglz r4xH4x](https://github.com/dirkleas/DLwigglz). Reference/example versions of the catalog files
+are included in the fork directory. The advantage of the
+ "fork" is that it provides several other cool workflow enhancements -- check it out for details -- highlights include:
 
 1. keyboard shortcut for File.Revert (renamed reOpen CMD-Shift-C)
 2. new File.Catalog option for creating a complete list of all your installed plugin modules in JSON format -- great for querying, reporting, and feeding pigeons in the park
 3. enhanced File.Save/SaveAs which saves plugin module width data in your patches which is 100% compatible with normal VCV Rack patches
+
+If you go with my Rack fork, and use the new `File.Catalog` menu option, a full `catalog.json`
+file will be generated. It's possible given the range of "official" and experimental plugin
+ modules available out there, that or more modules may "misbehave" and crash Rack. If this happens, don't
+panic. Just look at the `log.txt` log file or your OS-specific crash dump facilities to identify the offending module and add it to a fresh patch along with `DLwigglz r4xH4x` and click the `patch` button. This will generate a `patch.json` file with the important metadata for the offending patch(s). You can then run `p2f` from the fork directory to capture this in the
+ `faults.json` file which will keep `File.Catalog` from tripping over the faulty modules.
+ It's good practice to report a bug on the plugin module's developer Github site (look that
+up using the official VCV Rack [Plugin Manager page](https://vcvrack.com/plugins.html)).
 
 How does rackcli fit into a typical rack workflow? YMMV, but I'll be using rackcli alongside rack so I can bounce down to my shell prompt, kick off a rackcli command or two, then back to rack for a quick *File+Revert* to revert to the updated patch file (of course I regularly hit *META-S* to save my wigglz) -- walah, instant magic!
 
