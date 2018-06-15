@@ -12,7 +12,13 @@
 #include <iostream>
 #include <sys/stat.h>
 #include <dirent.h>
-#include <dlfcn.h>
+#if ARCH_WIN
+	#include <windows.h>
+	#include <direct.h>
+	#define mkdir(_dir, _perms) _mkdir(_dir)
+#else
+	#include <dlfcn.h>
+#endif
 
 using namespace rack;
 
