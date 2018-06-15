@@ -47,7 +47,7 @@ static bool loadPlugin(std::string path) {
 	if (!handle) {
 		int error = GetLastError();
 		// std::cout << "Failed to load library " << libraryFilename << ": code " << error << std::endl;
-		gLog += "Failed to load library " + libraryFilename + ": code " + error;
+		gLog += "Failed to load library " + libraryFilename + ": code " + std::to_string(error);
 		return 1;
 	}
 #else
