@@ -78,6 +78,9 @@ static bool loadPlugin(std::string path) {
 static void loadPlugins(std::string path) {
 	int plugins = 0;
 	std::string message;
+	Plugin *corePlugin = new Plugin();
+	init(corePlugin);
+	gPlugins.push_back(corePlugin);
 	for (std::string pluginPath : systemListEntries(path)) {
 		if (!systemIsDirectory(pluginPath)) {
 			message += pluginPath + " is an invalid plugin path";
@@ -100,7 +103,6 @@ int main(int argc, char* argv[]) {
 		std::cout << "usage: " << argv[0] << " PLUGINS_DIR" << std::endl;
 		return 1;
 	}
-	loggerInit(false);
 	tagsInit();
 	loadPlugins(argv[1]);
 	if (gPlugins.size() == 0) {
