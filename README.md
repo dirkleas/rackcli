@@ -32,7 +32,7 @@ Building the `r4xH4x CLI` is straightforward:
 1. replace src/main.cpp with the alternate version in this project's src/cpp/main.cpp
 1. `make`
 1. rename built `Rack[.exe]` to `r4xH4x[.exe]` and deploy somewhere in your path
-1. run via: r4xH4x [PATH_DIR] > catalog[.partial].json
+1. run via: r4xH4x [PLUGINS_DIR] > catalog[.partial].json
 
 How does rackcli fit into a typical rack workflow? YMMV, but I'll be using rackcli alongside rack so I can bounce down to my shell prompt, kick off a rackcli command or two, then back to rack for a quick *File+Revert* to revert to the updated patch file (of course I regularly hit *META-S* to save my wigglz) -- walah, instant magic!
 
