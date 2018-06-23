@@ -116,45 +116,45 @@ int main(int argc, char* argv[]) {
 		return 1;
 	}
 
-	json_t *metaj = json_object(); // meta as json, plugins as json, etc
-	json_t *psj = json_array();
-	json_object_set_new(metaj, "applicationName", json_string(gApplicationName.c_str()));
-	json_object_set_new(metaj, "applicationVersion", json_string(gApplicationVersion.c_str()));
-	json_object_set_new(metaj, "apiHost", json_string(gApiHost.c_str()));
-	json_object_set_new(metaj, "token", json_string(gToken.c_str()));
-	json_object_set_new(metaj, "path", json_string(getcwd(NULL, 0)));
-	json_object_set_new(metaj, "pluginCount", json_integer(gPlugins.size()));
+	json_t *catalogJ = json_object(); // meta as json, plugins as json, etc
+	json_t *pluginsJ = json_array();
+	json_object_set_new(catalogJ, "applicationName", json_string(gApplicationName.c_str()));
+	json_object_set_new(catalogJ, "applicationVersion", json_string(gApplicationVersion.c_str()));
+	json_object_set_new(catalogJ, "apiHost", json_string(gApiHost.c_str()));
+	json_object_set_new(catalogJ, "token", json_string(gToken.c_str()));
+	json_object_set_new(catalogJ, "path", json_string(getcwd(NULL, 0)));
+	json_object_set_new(catalogJ, "pluginCount", json_integer(gPlugins.size()));
 	for (Plugin *plugin : gPlugins) {
-		json_t *pj = json_object();
-		json_object_set_new(pj, "slug", json_string(plugin->slug.c_str()));
-		json_object_set_new(pj, "path", json_string(plugin->path.c_str()));
-		json_object_set_new(pj, "version", json_string(plugin->version.c_str()));
-		json_object_set_new(pj, "modelCount", json_integer(plugin->models.size()));
-		json_t *msj = json_array();
-		json_object_set_new(pj, "models", msj);
+		json_t *pluginJ = json_object();
+		json_object_set_new(pluginJ, "slug", json_string(plugin->slug.c_str()));
+		json_object_set_new(pluginJ, "path", json_string(plugin->path.c_str()));
+		json_object_set_new(pluginJ, "version", json_string(plugin->version.c_str()));
+		json_object_set_new(pluginJ, "modelCount", json_integer(plugin->models.size()));
+		json_t *modelsJ = json_array();
+		json_object_set_new(pluginJ, "models", modelsJ);
 		for (Model *model : plugin->models) {
-			json_t *mj = json_object();
-			json_object_set_new(mj, "slug", json_string(model->slug.c_str()));
-			json_object_set_new(mj, "name", json_string(model->name.c_str()));
-			json_object_set_new(mj, "author", json_string(model->author.c_str()));
-			json_t *tsj = json_array();
+			json_t *modelJ = json_object();
+			json_object_set_new(modelJ, "slug", json_string(model->slug.c_str()));
+			json_object_set_new(modelJ, "name", json_string(model->name.c_str()));
+			json_object_set_new(modelJ, "author", json_string(model->author.c_str()));
+			json_t *tagsJ = json_array();
 			for (ModelTag tag : model->tags) {
-				json_array_append(tsj, json_string(gTagNames[tag].c_str()));
+				json_array_append(tagsJ, json_string(gTagNames[tag].c_str()));
 			}
-			json_object_set_new(mj, "tags", tsj);
+			json_object_set_new(modelJ, "tags", tagsJ);
 
 			// instantiate model for geometry -- someday!?!?
 			// ModuleWidget *moduleWidget = model->createModuleWidget();
 			// if (!moduleWidget) return 1;
-			// json_object_set_new(mj, "width", json_integer(int(moduleWidget->box.size.x)));
-			// json_object_set_new(mj, "height", json_integer(int(moduleWidget->box.size.y)));
+			// json_object_set_new(modelJ, "width", json_integer(int(moduleWidget->box.size.x)));
+			// json_object_set_new(modelJ, "height", json_integer(int(moduleWidget->box.size.y)));
 
-			json_array_append(msj, mj);
+			json_array_append(modelsJ, modelJ);
 		}
-		json_array_append(psj, pj);
+		json_array_append(pluginsJ, pluginJ);
 	}
-	json_object_set_new(metaj, "plugins", psj);
-	json_object_set_new(metaj, "log", json_string(gLog.c_str()));
-	std::cout << json_dumps(metaj, JSON_INDENT(2) | JSON_REAL_PRECISION(9)) << std::endl;
+	json_object_set_new(catalogJ, "plugins", pluginsJ);
+	json_object_set_new(catalogJ, "log", json_string(gLog.c_str()));
+	std::cout << json_dumps(catalogJ, JSON_INDENT(2) | JSON_REAL_PRECISION(9)) << std::endl;
 	return 0;
 }
