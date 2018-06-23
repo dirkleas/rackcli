@@ -1,3 +1,2 @@
 .DS_Store
-dep/rackshim/build
-dep/rackshim/rackshim
+src/cpp/build
