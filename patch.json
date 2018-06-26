@@ -1,0 +1,39 @@
+{
+  "version": "0.6.1",
+  "modules": [
+    {
+      "plugin": "DLwigglz",
+      "version": "0.6.1",
+      "model": "DWLwigglz-r4xH4x",
+      "pos": [
+        15,
+        0
+      ],
+      "params": [
+        {
+          "paramId": 0,
+          "value": 0.0
+        },
+        {
+          "paramId": 1,
+          "value": 1.0
+        }
+      ],
+      "width": 90,
+      "height": 380,
+      "paramCount": 2,
+      "inputCount": 1,
+      "outputCount": 0
+    }
+  ],
+  "wires": [],
+  "pixelRatio": 2,
+  "xpos": 0,
+  "ypos": 22,
+  "width": 640,
+  "height": 878,
+  "lastMousePos": [
+    265,
+    207
+  ]
+}
