@@ -6,14 +6,9 @@ rackcli CLI "features" cater towards making your life easier for managing your r
 installed plugins and their modules which I refer to as the "catalog" -- it's actually a simple
 JSON file named `catalog.json` residing in the Rack directory. The care and feeding of the catalog depends on one of several mechanisms 1) my [fork of VCV Rack](https://github.com/dirkleas/Rack), 2) my plugin module [DLwigglz r4xH4x](https://github.com/dirkleas/DLwigglz), or 3)
 [r4xH4x CLI](https://github.com/dirkleas/rackcli/blob/master/src/cpp/r4xh4x.cpp) non-GUI partial catalog generator. The first two options leverage a running Rack instance and optional plugin. Reference/example versions of the catalog files
-are included in the fork directory. The additional advantage of the
- "fork" is that it provides several other cool workflow enhancements beyond module geometries -- check it out for details -- highlights include:
+are included in the fork directory. The additional advantage of the "fork" is that it provides several other cool workflow enhancements beyond module geometries -- check it out for details!
 
-1. keyboard shortcut for File.Revert (renamed reOpen CMD-Shift-C)
-1. new File.Catalog option for creating a complete list of all your installed plugin modules in JSON format -- great for querying, reporting, and feeding pigeons in the park
-1. enhanced File.Save/SaveAs which saves plugin module width data in your patches which is 100% compatible with normal VCV Rack patches
-
-If you go with my Rack fork, and use the new `File.Catalog` menu option, a full `catalog.json`
+If you go with my Rack fork, and click the new `Catalog` toolbar button, a full `catalog.json`
 file will be generated. It's possible given the range of "official" and experimental plugin
  modules available out there, that or more modules may "misbehave" and crash Rack. If this happens, don't
 panic. Just look at the `log.txt` log file or your OS-specific crash dump facilities to identify the offending module and add it to a fresh patch along with `DLwigglz r4xH4x` and click the `patch` button. The `r4xH4x` module will generate a `patch.json` file with the important metadata for the offending patch(s). You can then run `p2f` from the fork directory to capture this in the
