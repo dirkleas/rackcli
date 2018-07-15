@@ -14,6 +14,9 @@ implemented in [rackcloud](https://github.com/dirkleas/rackcloud)
 1. rackcli_slice - slicing patch "chunks" for import/export, layout management, etc.
 1. rackcli_compose - compose patch fragments (e.g. cf mixer)
 1. rackcli_sequence - the "10-second rule" and reasonable sequencing with virtually any sequencer (trigger and cv)
-1. ...
+1. rackcli_h4x - indexing, module-based cataloging, and QA/benchmarking
+1. rackcli_core - reusable bits
+1. rackcli_screenshot - screenshot individual modules
+1. rackcli_analytics - scrape rack patches from the wild
 
 Use concept and/or code from the lab at your own risk!

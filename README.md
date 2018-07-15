@@ -2,6 +2,8 @@
 
 Commandline-interface (CLI) for [VCV Rack](https://vcvrack.com/) to help with managing your local rack installation, installed plugins, and patches. Additionally, it provides a complementary incubation venue for prototyping/implementing features/capabilities experimentally in consideration in the official VCV Rack environment under an alternative development model.
 
+Check out the [lab](https://github.com/dirkleas/rackcli/tree/master/lab), the project incubator, and `src` for more mature code bits.
+
 rackcli CLI "features" cater towards making your life easier for managing your rack installation as well as providing lots of "magic" to make your patching/wiggling/performance workflow smoother and faster than ever! Core to these features is the concept of centralized metadata for all the
 installed plugins and their modules which I refer to as the "catalog" -- it's actually a simple
 JSON file named `catalog.json` residing in the Rack directory. The care and feeding of the catalog depends on one of several mechanisms 1) my [fork of VCV Rack](https://github.com/dirkleas/Rack), 2) my plugin module [DLwigglz r4xH4x](https://github.com/dirkleas/DLwigglz), or 3)
